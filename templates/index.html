@@ -4,19 +4,48 @@
 <meta charset="UTF-8">
 <title>Snake Game</title>
 <style>
-  body { text-align: center; font-family: sans-serif; }
-  canvas { background: #000; display: block; margin: 20px auto; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: sans-serif;
+    background-color: black;
+  }
+
+  #game {
+    display: block;
+    margin: 0 auto;
+    background-color: black;
+  }
+
+  h1 {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 40px;
+    z-index: 10;
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
-<h1>Snake Game</h1>
-<canvas id="game" width="400" height="400"></canvas>
+<h1>Aman</h1>
+<canvas id="game"></canvas>
 <script>
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+
+// Set canvas to full window size
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 const box = 20;
-let snake = [{x: 9*box, y: 10*box}];
-let food = {x: Math.floor(Math.random()*20)*box, y: Math.floor(Math.random()*20)*box};
+let snake = [{x: Math.floor(canvas.width/2/box)*box, y: Math.floor(canvas.height/2/box)*box}];
+let food = {x: Math.floor(Math.random()*(canvas.width/box))*box, y: Math.floor(Math.random()*(canvas.height/box))*box};
 let dir;
 
 document.addEventListener("keydown", event => {
@@ -27,14 +56,17 @@ document.addEventListener("keydown", event => {
 });
 
 function draw() {
+  // Clear screen
   ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, 400, 400);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // Draw snake
   for(let i=0; i<snake.length; i++){
     ctx.fillStyle = (i === 0) ? "lime" : "green";
     ctx.fillRect(snake[i].x, snake[i].y, box, box);
   }
 
+  // Draw food
   ctx.fillStyle = "red";
   ctx.fillRect(food.x, food.y, box, box);
 
@@ -46,23 +78,31 @@ function draw() {
   if(dir==="RIGHT") snakeX += box;
   if(dir==="DOWN") snakeY += box;
 
+  // Eat food
   if(snakeX === food.x && snakeY === food.y){
-    food = {x: Math.floor(Math.random()*20)*box, y: Math.floor(Math.random()*20)*box};
+    food = {x: Math.floor(Math.random()*(canvas.width/box))*box, y: Math.floor(Math.random()*(canvas.height/box))*box};
   } else {
     snake.pop();
   }
 
-  let newHead = {x: snakeX, y: snakeY};
-
-  if(snakeX < 0 || snakeX >= 400 || snakeY < 0 || snakeY >= 400 || snake.some(s => s.x === snakeX && s.y === snakeY)){
+  // Collision detection
+  let hitSelf = snake.some(s => s.x === snakeX && s.y === snakeY);
+  if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || hitSelf){
     clearInterval(game);
     alert("Game Over");
   }
 
+  let newHead = {x: snakeX, y: snakeY};
   snake.unshift(newHead);
 }
 
-let game = setInterval(draw, 150);
+// Adjust canvas size on window resize
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+let game = setInterval(draw, 100);
 </script>
 </body>
 </html>
